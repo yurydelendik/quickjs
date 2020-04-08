@@ -44,6 +44,15 @@ extern "C" {
 #define __js_printf_like(a, b)
 #endif
 
+#if defined(__wasi__)
+#define EMSCRIPTEN
+
+#define FE_TONEAREST  0
+#define FE_DOWNWARD   0x400
+#define FE_UPWARD     0x800
+#define FE_TOWARDZERO 0xc00
+#endif
+
 #define JS_BOOL int
 
 typedef struct JSRuntime JSRuntime;

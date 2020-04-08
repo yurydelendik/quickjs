@@ -1,5 +1,11 @@
 <h1>QuickJS Javascript Engine</h1>
 
+<h2>WIP Notes</h2>
+
+* Compile with ./build.sh ; define `WASI_PREFIX` and `WASMTIME` environment variables.
+* REPL disabled (for now)
+
+
 <h2>News</h2>
 
 <ul>

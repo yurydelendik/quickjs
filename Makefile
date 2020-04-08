@@ -22,6 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+CONFIG_WASM=y
 ifeq ($(shell uname -s),Darwin)
 CONFIG_DARWIN=y
 endif
@@ -56,8 +57,13 @@ ifdef CONFIG_WIN32
   CROSS_PREFIX=i686-w64-mingw32-
   EXE=.exe
 else
+ifdef CONFIG_WASM
+  CROSS_PREFIX=
+  EXE=.wasm
+else
   CROSS_PREFIX=
   EXE=
+endif
 endif
 ifdef CONFIG_CLANG
   HOST_CC=clang
@@ -230,10 +236,12 @@ libquickjs.a: $(patsubst %.o, %.nolto.o, $(QJS_LIB_OBJS))
 endif # CONFIG_LTO
 
 repl.c: $(QJSC) repl.js
-	$(QJSC) -c -o $@ -m repl.js
+#	$(QJSC) -c -o $@ -m repl.js
+	./wasmtime-qjsc -c -o $@ -m repl.js
 
 qjscalc.c: $(QJSC) qjscalc.js
-	$(QJSC) -fbignum -c -o $@ qjscalc.js
+#	$(QJSC) -fbignum -c -o $@ qjscalc.js
+	./wasmtime-qjsc -fbignum -c -o $@ qjscalc.js
 
 ifneq ($(wildcard unicode/UnicodeData.txt),)
 $(OBJDIR)/libunicode.o $(OBJDIR)/libunicode.m32.o $(OBJDIR)/libunicode.m32s.o \

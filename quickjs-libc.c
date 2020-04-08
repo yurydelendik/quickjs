@@ -41,6 +41,8 @@
 #include <windows.h>
 #include <conio.h>
 #include <utime.h>
+#elif defined(__wasi__)
+#include <sys/ioctl.h>
 #else
 #include <dlfcn.h>
 #include <termios.h>
@@ -57,7 +59,7 @@ typedef sig_t sighandler_t;
 
 #endif
 
-#if !defined(_WIN32)
+#if !defined(_WIN32) && !defined(__wasi__)
 /* enable the os.Worker API. IT relies on POSIX threads */
 #define USE_WORKER
 #endif
@@ -453,7 +455,7 @@ typedef JSModuleDef *(JSInitModuleFunc)(JSContext *ctx,
                                         const char *module_name);
 
 
-#if defined(_WIN32)
+#if defined(_WIN32) || defined(__wasi__)
 static JSModuleDef *js_module_loader_so(JSContext *ctx,
                                         const char *module_name)
 {
@@ -530,7 +532,7 @@ int js_module_set_import_meta(JSContext *ctx, JSValueConst func_val,
         return -1;
     if (!strchr(module_name, ':')) {
         strcpy(buf, "file://");
-#if !defined(_WIN32)
+#if !defined(_WIN32) && !defined(__wasi__)
         /* realpath() cannot be used with modules compiled with qjsc
            because the corresponding module source code is not
            necessarily present */
@@ -707,7 +709,11 @@ static void js_std_file_finalizer(JSRuntime *rt, JSValue val)
     if (s) {
         if (s->f && s->close_in_finalizer) {
             if (s->is_popen)
+#if defined(__wasi__)
+                abort();
+#else            
                 pclose(s->f);
+#endif
             else
                 fclose(s->f);
         }
@@ -828,11 +834,16 @@ static JSValue js_std_popen(JSContext *ctx, JSValueConst this_val,
         goto fail;
     }
 
+#if defined(__wasi__)
+    f = NULL;
+    err = FOPEN_MAX;
+#else
     f = popen(filename, mode);
     if (!f)
         err = errno;
     else
         err = 0;
+#endif
     if (argc >= 3)
         js_set_error_object(ctx, argv[2], err);
     JS_FreeCString(ctx, filename);
@@ -879,6 +890,13 @@ static JSValue js_std_fdopen(JSContext *ctx, JSValueConst this_val,
     return JS_EXCEPTION;
 }
 
+#if defined(__wasi__)
+static JSValue js_std_tmpfile(JSContext *ctx, JSValueConst this_val,
+                              int argc, JSValueConst *argv)
+{
+    return JS_ThrowReferenceError(ctx, "js_std_tmpfile are not supported yet");
+}
+#else
 static JSValue js_std_tmpfile(JSContext *ctx, JSValueConst this_val,
                               int argc, JSValueConst *argv)
 {
@@ -890,6 +908,7 @@ static JSValue js_std_tmpfile(JSContext *ctx, JSValueConst this_val,
         return JS_NULL;
     return js_new_std_file(ctx, f, TRUE, FALSE);
 }
+#endif
 
 static JSValue js_std_sprintf(JSContext *ctx, JSValueConst this_val,
                           int argc, JSValueConst *argv)
@@ -951,7 +970,11 @@ static JSValue js_std_file_close(JSContext *ctx, JSValueConst this_val,
     if (!s->f)
         return JS_ThrowTypeError(ctx, "invalid file handle");
     if (s->is_popen)
+#if defined(__wasi__)    
+        abort();
+#else
         err = js_get_errno(pclose(s->f));
+#endif
     else
         err = js_get_errno(fclose(s->f));
     s->f = NULL;
@@ -1220,6 +1243,13 @@ static int http_get_status(const char *buf)
     return atoi(p);
 }
 
+#if defined(__wasi__)
+static JSValue js_std_urlGet(JSContext *ctx, JSValueConst this_val,
+                             int argc, JSValueConst *argv)
+{
+    return JS_ThrowReferenceError(ctx, "js_std_urlGet are not supported yet");
+}
+#else
 static JSValue js_std_urlGet(JSContext *ctx, JSValueConst this_val,
                              int argc, JSValueConst *argv)
 {
@@ -1366,6 +1396,7 @@ static JSValue js_std_urlGet(JSContext *ctx, JSValueConst this_val,
     JS_FreeValue(ctx, response);
     return JS_EXCEPTION;
 }
+#endif
 
 static JSClassDef js_std_file_class = {
     "FILE",
@@ -1609,6 +1640,43 @@ static JSValue js_os_ttySetRaw(JSContext *ctx, JSValueConst this_val,
     SetConsoleMode(handle, ENABLE_WINDOW_INPUT);
     return JS_UNDEFINED;
 }
+#elif defined(__wasi__)
+static JSValue js_os_ttyGetWinSize(JSContext *ctx, JSValueConst this_val,
+                                   int argc, JSValueConst *argv)
+{
+    // int fd;
+    // HANDLE handle;
+    // CONSOLE_SCREEN_BUFFER_INFO info;
+    // JSValue obj;
+
+    // if (JS_ToInt32(ctx, &fd, argv[0]))
+    //     return JS_EXCEPTION;
+    // handle = (HANDLE)_get_osfhandle(fd);
+    
+    // if (!GetConsoleScreenBufferInfo(handle, &info))
+    //     return JS_NULL;
+    // obj = JS_NewArray(ctx);
+    // if (JS_IsException(obj))
+    //     return obj;
+    // JS_DefinePropertyValueUint32(ctx, obj, 0, JS_NewInt32(ctx, info.dwSize.X), JS_PROP_C_W_E);
+    // JS_DefinePropertyValueUint32(ctx, obj, 1, JS_NewInt32(ctx, info.dwSize.Y), JS_PROP_C_W_E);
+    // return obj;
+    return JS_NULL;
+}
+
+static JSValue js_os_ttySetRaw(JSContext *ctx, JSValueConst this_val,
+                               int argc, JSValueConst *argv)
+{
+    // int fd;
+    // HANDLE handle;
+
+    // if (JS_ToInt32(ctx, &fd, argv[0]))
+    //     return JS_EXCEPTION;
+    // handle = (HANDLE)_get_osfhandle(fd);
+    
+    // SetConsoleMode(handle, ENABLE_WINDOW_INPUT);
+    return JS_UNDEFINED;
+}
 #else
 static JSValue js_os_ttyGetWinSize(JSContext *ctx, JSValueConst this_val,
                                    int argc, JSValueConst *argv)
@@ -1799,6 +1867,15 @@ static void os_signal_handler(int sig_num)
     os_pending_signals |= ((uint64_t)1 << sig_num);
 }
 
+#if defined(__wasi__)
+static JSValue js_os_signal(JSContext *ctx, JSValueConst this_val,
+                            int argc, JSValueConst *argv)
+{
+    //return JS_ThrowReferenceError(ctx, "js_os_signal are not supported yet");
+    return JS_UNDEFINED; // Allow set and ignore callbacks
+}
+#else
+
 #if defined(_WIN32)
 typedef void (*sighandler_t)(int sig_num);
 #endif
@@ -1849,6 +1926,7 @@ static JSValue js_os_signal(JSContext *ctx, JSValueConst this_val,
     }
     return JS_UNDEFINED;
 }
+#endif
 
 #if defined(__linux__) || defined(__APPLE__)
 static int64_t get_time_ms(void)
@@ -2261,15 +2339,24 @@ static JSValue js_os_getcwd(JSContext *ctx, JSValueConst this_val,
 {
     char buf[PATH_MAX];
     int err;
-    
+
+#if defined(__wasi__)
+    buf[0] = '.';
+    buf[1] = '\0';
+    err = 0;
+#else
     if (!getcwd(buf, sizeof(buf))) {
         buf[0] = '\0';
         err = errno;
     } else {
         err = 0;
     }
+#endif
+
     return make_string_error(ctx, buf, err);
 }
+
+#if !defined(__wasi__)
 
 static JSValue js_os_chdir(JSContext *ctx, JSValueConst this_val,
                            int argc, JSValueConst *argv)
@@ -2981,6 +3068,7 @@ static JSValue js_os_dup2(JSContext *ctx, JSValueConst this_val,
 }
 
 #endif /* !_WIN32 */
+#endif /* !__wasi__ */
 
 #ifdef USE_WORKER
 
@@ -3477,6 +3565,7 @@ static const JSCFunctionListEntry js_os_funcs[] = {
     JS_CFUNC_DEF("clearTimeout", 1, js_os_clearTimeout ),
     JS_PROP_STRING_DEF("platform", OS_PLATFORM, 0 ),
     JS_CFUNC_DEF("getcwd", 0, js_os_getcwd ),
+#if !defined(__wasi__)
     JS_CFUNC_DEF("chdir", 0, js_os_chdir ),
     JS_CFUNC_DEF("mkdir", 1, js_os_mkdir ),
     JS_CFUNC_DEF("readdir", 1, js_os_readdir ),
@@ -3508,6 +3597,7 @@ static const JSCFunctionListEntry js_os_funcs[] = {
     JS_CFUNC_DEF("sleep", 1, js_os_sleep ),
     JS_CFUNC_DEF("dup", 1, js_os_dup ),
     JS_CFUNC_DEF("dup2", 2, js_os_dup2 ),
+#endif
 #endif
 };
 

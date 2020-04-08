@@ -504,7 +504,12 @@ int main(int argc, char **argv)
                 goto fail;
         }
         if (interactive) {
+#if !defined(__wasi__)
             js_std_eval_binary(ctx, qjsc_repl, qjsc_repl_size, 0);
+#else
+        fprintf(stderr, "qjs: interactive mode is not supported in wasi\n");
+        exit(20);
+#endif
         }
         js_std_loop(ctx);
     }

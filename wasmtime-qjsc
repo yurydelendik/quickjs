@@ -1,0 +1,2 @@
+#!/bin/bash
+${WASMTIME:-wasmtime} run --opt-level 0 --mapdir .::$PWD qjsc.wasm -- $@
