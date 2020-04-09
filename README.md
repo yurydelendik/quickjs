@@ -4,7 +4,7 @@
 
 * Compile with ./build.sh ; define `WASI_PREFIX` and `WASMTIME` environment variables.
 * REPL disabled (for now)
-
+* Added "qjsr" to simplify execution of single files (no diagnostics)
 
 <h2>News</h2>
 

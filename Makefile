@@ -188,6 +188,9 @@ $(OBJDIR):
 qjs$(EXE): $(QJS_OBJS)
 	$(CC) $(LDFLAGS) $(LDEXPORT) -o $@ $^ $(LIBS)
 
+qjsr$(EXE): $(OBJDIR)/qjsr.o $(QJS_LIB_OBJS)
+	$(CC) $(LDFLAGS) $(LDEXPORT) -o $@ $^ $(LIBS)
+
 qjs-debug$(EXE): $(patsubst %.o, %.debug.o, $(QJS_OBJS))
 	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
 
