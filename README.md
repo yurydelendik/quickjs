@@ -3,14 +3,19 @@
 <h2>News</h2>
 
 <ul>
+  <li>2020-07-05:
+    <ul>
+      <li>New release (<a href="https://bellard.org/quickjs/Changelog">Changelog</a>)</li>
+    </ul>
+  </li>
   <li>2020-04-12:
     <ul>
-      <li>New release</li>
+      <li>New release (<a href="https://bellard.org/quickjs/Changelog">Changelog</a>)</li>
     </ul>
   </li>
   <li>2020-03-16:
     <ul>
-      <li>New release</li>
+      <li>New release (<a href="https://bellard.org/quickjs/Changelog">Changelog</a>)</li>
     </ul>
   </li>
   <li>2020-01-19:
@@ -52,7 +57,7 @@ microseconds.</li>
   support including modules, asynchronous generators and full Annex B
   support (legacy web compatibility).</li>
 
-<li>Passes nearly 100% of the ECMAScript Test Suite tests when selecting the ES2020 features.</li>
+<li>Passes nearly 100% of the ECMAScript Test Suite tests when selecting the ES2020 features. A summary is available at <a href="https://test262.report/">Test262 Report</a>.</li>
 
 <li> Can compile Javascript sources to executables with no external dependency.</li>
 
@@ -76,7 +81,7 @@ extensions is available
 at <a href="http://numcalc.com">numcalc.com</a>. It was compiled from
 C to WASM/asm.js with Emscripten.
 <p>
-<tt>qjs</tt> and <tt>qjscalc</tt> can be run in <a href="https://bellard.org/jslinux/vm.html?url=buildroot-x86.cfg">JSLinux</a>.
+<tt>qjs</tt> and <tt>qjscalc</tt> can be run in <a href="https://bellard.org/jslinux/vm.html?url=alpine-x86.cfg">JSLinux</a>.
 
 <h2>Documentation</h2>
 
@@ -90,18 +95,18 @@ version</a>, <a href="https://bellard.org/quickjs/jsbignum.pdf">PDF version</a>.
 
 <ul>
   <li>
-    QuickJS source code: <a href="https://bellard.org/quickjs/quickjs-2020-04-12.tar.xz">quickjs-2020-04-12.tar.xz</a></li>
+    QuickJS source code: <a href="https://bellard.org/quickjs/quickjs-2020-07-05.tar.xz">quickjs-2020-07-05.tar.xz</a></li>
   <li>
-    QuickJS extras (contain the unicode files needed to rebuild the unicode tables and the bench-v8 benchmark): <a href="https://bellard.org/quickjs/quickjs-extras-2020-04-12.tar.xz">quickjs-extras-2020-04-12.tar.xz</a>
+    QuickJS extras (contain the unicode files needed to rebuild the unicode tables and the bench-v8 benchmark): <a href="https://bellard.org/quickjs/quickjs-extras-2020-07-05.tar.xz">quickjs-extras-2020-07-05.tar.xz</a>
   </li>
   <li>
     Unofficial <a href="https://github.com/horhof/quickjs">git mirror</a>.
   </li>
   <li>
-    Binary releases for Linux are available in <a href="https://github.com/GoogleChromeLabs/jsvu">jsvu</a> and <a href="https://bellard.org/quickjs/binary_releases">here</a>.
+    Binary releases for Linux are available in <a href="https://github.com/GoogleChromeLabs/jsvu">jsvu</a>, <a href="https://github.com/devsnek/esvu">esvu</a> and <a href="https://bellard.org/quickjs/binary_releases">here</a>.
   </li>
   <li>
-    Typescript compiler compiled with QuickJS: <a href="https://bellard.org/quickjs/quickjs-typescript-linux-x86.tar.xz">quickjs-typescript-linux-x86.tar.xz</a>
+    Typescript compiler compiled with QuickJS: <a href="https://bellard.org/quickjs/quickjs-typescript-4.0.0-linux-x86.tar.xz">quickjs-typescript-4.0.0-linux-x86.tar.xz</a>
   </li>
   <li>
     Babel compiler compiled with QuickJS: <a href="https://bellard.org/quickjs/quickjs-babel-linux-x86.tar.xz">quickjs-babel-linux-x86.tar.xz</a>
