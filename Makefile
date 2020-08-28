@@ -197,6 +197,10 @@ qjs-debug$(EXE): $(patsubst %.o, %.debug.o, $(QJS_OBJS))
 qjsc$(EXE): $(OBJDIR)/qjsc.o $(QJS_LIB_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
 
+qjss.wasm: qjss.c $(QJS_LIB_OBJS)
+	$(CC) qjss.c $(QJS_LIB_OBJS) -O2 -o $@ \
+	  -Wl,--no-entry,--export=_initialize,--export=malloc,--export=free
+
 ifneq ($(CROSS_PREFIX),)
 
 $(QJSC): $(OBJDIR)/qjsc.host.o \

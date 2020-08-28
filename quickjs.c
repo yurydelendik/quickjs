@@ -5485,7 +5485,7 @@ void __JS_FreeValueRT(JSRuntime *rt, JSValue v)
         }
         break;
     default:
-        printf("__JS_FreeValue: unknown tag=%d\n", tag);
+        // fprintf(stderr, "__JS_FreeValue: unknown tag=%d\n", tag);
         abort();
     }
 }
